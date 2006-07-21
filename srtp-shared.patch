@@ -1,0 +1,247 @@
+--- srtp/crypto/Makefile.in.orig	2005-10-03 17:16:37.000000000 +0200
++++ srtp/crypto/Makefile.in	2006-07-21 20:27:23.861073500 +0200
+@@ -14,9 +14,9 @@
+ CPPFLAGS= @CPPFLAGS@
+ CFLAGS	= @CFLAGS@
+ LIBS	= @LIBS@
+-LDFLAGS	= @LDFLAGS@ -L.
++LDFLAGS	= @LDFLAGS@
+ COMPILE = $(CC) $(DEFS) $(INCDIR) $(CPPFLAGS) $(CFLAGS)
+-CRYPTOLIB = -lcryptomodule
++CRYPTOLIB = libcryptomodule.la
+ 
+ RANLIB	= @RANLIB@
+ 
+@@ -52,7 +52,7 @@
+ p=00112233445566778899aabbccddeeff
+ c=69c4e0d86a7b0430d8cdb78070b4c55a
+ 
+-runtest: libcryptomodule.a $(testapp)
++runtest: libcryptomodule.la $(testapp)
+ 	test/env$(EXE) # print out information on the build environment
+ 	@echo "running libcryptomodule test applications..."
+ 	test `test/aes_calc $k $p` = $c
+@@ -64,35 +64,35 @@
+ 	test/rand_gen$(EXE) -n 256 >/dev/null
+ 	@echo "libcryptomodule test applications passed."
+ 
+-# libcryptomodule.a (the crypto engine) 
++# libcryptomodule.la (the crypto engine) 
+ 
+-ciphers = cipher/cipher.o cipher/null_cipher.o      \
+-          cipher/aes.o cipher/aes_icm.o             \
+-          cipher/aes_cbc.o
++ciphers = cipher/cipher.lo cipher/null_cipher.lo      \
++          cipher/aes.lo cipher/aes_icm.lo             \
++          cipher/aes_cbc.lo
+ 
+-hashes  = hash/null_auth.o hash/sha1.o \
+-          hash/hmac.o hash/auth.o
++hashes  = hash/null_auth.lo hash/sha1.lo \
++          hash/hmac.lo hash/auth.lo
+ 
+-math    = math/datatypes.o math/stat.o
++math    = math/datatypes.lo math/stat.lo
+ 
+-rng     = rng/$(RNG_OBJS) rng/rand_source.o rng/prng.o rng/ctr_prng.o
++rng     = rng/$(RNG_OBJS) rng/rand_source.lo rng/prng.lo rng/ctr_prng.lo
+ 
+-err     = kernel/err.o
++err     = kernel/err.lo
+ 
+-kernel  = kernel/crypto_kernel.o  kernel/alloc.o   \
+-          kernel/key.o $(rng) $(err)
++kernel  = kernel/crypto_kernel.lo  kernel/alloc.lo   \
++          kernel/key.lo $(rng) $(err)
+ 
+-xfm     = ae_xfm/xfm.o
++xfm     = ae_xfm/xfm.lo
+ 
+ cryptobj =  $(ciphers) $(hashes) $(math) $(stat) $(kernel) $(xfm)
+ 
+ # the rule for making object files and test apps
+ 
+-%.o: %.c
+-	$(COMPILE) -c $< -o $@
++%.lo: %.c
++	libtool --mode=compile $(COMPILE) -c $< -o $@
+ 
+-%$(EXE): %.c libcryptomodule.a 
+-	$(COMPILE) $(LDFLAGS) $< -o $@ $(CRYPTOLIB) $(LIBS)
++%$(EXE): %.c libcryptomodule.la 
++	libtool --mode=link $(COMPILE) $(LDFLAGS) $< -o $@ $(CRYPTOLIB) $(LIBS)
+ 
+ ifndef AR
+   AR=ar
+@@ -100,17 +100,16 @@
+ 
+ # and the crypto module library itself
+ 
+-libcryptomodule.a: $(cryptobj) 
+-	$(AR) cr libcryptomodule.a $(cryptobj) 
+-	$(RANLIB) libcryptomodule.a
++libcryptomodule.la: $(cryptobj)
++	libtool --mode=link $(CC) $(LDFLAGS) -o $@ $^
+ 
+-all: libcryptomodule.a $(testapp)
++all: libcryptomodule.la $(testapp)
+ 
+ # housekeeping functions
+ 
+ clean:
+-	rm -f libcryptomodule.a
+-	rm -f $(testapp) *.o */*.o 
++	rm -f libcryptomodule.la
++	rm -f $(testapp) *.*o */*.*o
+ 	for a in * .* */*; do if [ -f "$$a~" ] ; then rm $$a~; fi; done;
+ 	rm -f `find . -name "*.[ch]~*~"`
+ 	rm -rf latex
+--- srtp/Makefile.in.orig	2006-03-17 22:00:46.000000000 +0100
++++ srtp/Makefile.in	2006-07-21 20:44:16.620367000 +0200
+@@ -36,9 +36,9 @@
+ CPPFLAGS= @CPPFLAGS@
+ CFLAGS	= @CFLAGS@
+ LIBS	= @LIBS@
+-LDFLAGS	= @LDFLAGS@ -L.
++LDFLAGS	= @LDFLAGS@
+ COMPILE = $(CC) $(DEFS) $(INCDIR) $(CPPFLAGS) $(CFLAGS)
+-SRTPLIB	= -lsrtp
++SRTPLIB	= libsrtp.la
+ 
+ RANLIB	= @RANLIB@
+ INSTALL	= @INSTALL@
+@@ -67,51 +67,52 @@
+ %.o: %.c
+ 	$(COMPILE) -c $< -o $@
+ 
++%.lo: %.c
++	libtool --mode=compile $(COMPILE) -c $< -o $@
++
+ %$(EXE): %.c
+-	$(COMPILE) $(LDFLAGS) $< -o $@ $(SRTPLIB) $(LIBS)
++	libtool --mode=link $(COMPILE) $(LDFLAGS) $< -o $@ $(SRTPLIB) $(LIBS)
+ 
+ 
+-# libcrypt.a (the crypto engine) 
+-ciphers = crypto/cipher/cipher.o crypto/cipher/null_cipher.o      \
+-          crypto/cipher/aes.o crypto/cipher/aes_icm.o             \
+-          crypto/cipher/aes_cbc.o
++# libcrypt.la (the crypto engine) 
++ciphers = crypto/cipher/cipher.lo crypto/cipher/null_cipher.lo      \
++          crypto/cipher/aes.lo crypto/cipher/aes_icm.lo             \
++          crypto/cipher/aes_cbc.lo
+ 
+-hashes  = crypto/hash/null_auth.o crypto/hash/sha1.o \
+-          crypto/hash/hmac.o crypto/hash/auth.o # crypto/hash/tmmhv2.o 
++hashes  = crypto/hash/null_auth.lo crypto/hash/sha1.lo \
++          crypto/hash/hmac.lo crypto/hash/auth.lo # crypto/hash/tmmhv2.lo
+ 
+-replay  = crypto/replay/rdb.o crypto/replay/rdbx.o               \
+-          crypto/replay/ut_sim.o 
++replay  = crypto/replay/rdb.lo crypto/replay/rdbx.lo               \
++          crypto/replay/ut_sim.lo 
+ 
+-math    = crypto/math/datatypes.o crypto/math/stat.o
++math    = crypto/math/datatypes.lo crypto/math/stat.lo
+ 
+-ust     = crypto/ust/ust.o 
++ust     = crypto/ust/ust.lo
+ 
+-rng     = crypto/rng/$(RNG_OBJS) crypto/rng/prng.o crypto/rng/ctr_prng.o
++rng     = crypto/rng/$(RNG_OBJS) crypto/rng/prng.lo crypto/rng/ctr_prng.lo
+ 
+-err     = crypto/kernel/err.o
++err     = crypto/kernel/err.lo
+ 
+-kernel  = crypto/kernel/crypto_kernel.o  crypto/kernel/alloc.o   \
+-          crypto/kernel/key.o $(rng) $(err) # $(ust) 
++kernel  = crypto/kernel/crypto_kernel.lo  crypto/kernel/alloc.lo   \
++          crypto/kernel/key.lo $(rng) $(err) # $(ust) 
+ 
+ cryptobj =  $(ciphers) $(hashes) $(math) $(stat) $(kernel) $(replay)
+ 
+-# libsrtp.a (implements srtp processing)
++# libsrtp.la (implements srtp processing)
+ 
+-srtpobj = srtp/srtp.o 
++srtpobj = srtp/srtp.lo 
+ 
+-libsrtp.a: $(srtpobj) $(cryptobj) $(gdoi)
+-	ar cr libsrtp.a $^
+-	$(RANLIB) libsrtp.a
++libsrtp.la: $(srtpobj) $(cryptobj) $(gdoi)
++	libtool --mode=link $(CC) -o $@ $^ -rpath $(libdir)
+ 
+ # libcryptomath.a contains general-purpose routines that are used to
+ # generate tables and verify cryptoalgorithm implementations - this
+ # library is not meant to be included in production code
+ 
+-cryptomath = crypto/math/math.o crypto/math/gf2_8.o 
++cryptomath = crypto/math/math.lo crypto/math/gf2_8.lo
+ 
+-libcryptomath.a: $(cryptomath)
+-	ar cr libcryptomath.a $(cryptomath)
+-	$(RANLIB) libcryptomath.a
++libcryptomath.la: $(cryptomath)
++	libtool --mode=link $(CC) -o $@ $^
+ 
+ 
+ # test applications 
+@@ -124,10 +125,10 @@
+ testapp = $(crypto_testapp) test/srtp_driver$(EXE) test/replay_driver$(EXE) \
+ 	  test/roc_driver$(EXE) test/rdbx_driver$(EXE) test/rtpw$(EXE)
+ 
+-$(testapp): libsrtp.a
++$(testapp): libsrtp.la
+ 
+ test/rtpw$(EXE): test/rtpw.c test/rtp.c
+-	$(COMPILE) $(LDFLAGS) -o $@ $^ $(LIBS) $(SRTPLIB)
++	libtool --mode=link $(COMPILE) $(LDFLAGS) -o $@ $^ $(LIBS) $(SRTPLIB)
+ 
+ test: $(testapp)
+ 	@echo "Build done. Please run '$(MAKE) runtest' to run self tests."
+@@ -151,8 +152,8 @@
+ 
+ # in the tables/ subdirectory, we use libcryptomath instead of libsrtp
+ 
+-tables/%: tables/%.c libcryptomath.a 
+-	$(COMPILE) $(LDFLAGS) $< -o $@ $(LIBS) libcryptomath.a
++tables/%: tables/%.c libcryptomath.la 
++	libtool --mode=link $(COMPILE) $(LDFLAGS) $< -o $@ $(LIBS) libcryptomath.la
+ 
+ # the target 'plot' runs the timing test (test/srtp_driver -t) then
+ # uses gnuplot to produce plots of the results - see the script file
+@@ -184,15 +185,15 @@
+ 	$(INSTALL) -d $(DESTDIR)$(libdir)
+ 	cp include/*.h $(DESTDIR)$(includedir)/srtp  
+ 	cp crypto/include/*.h $(DESTDIR)$(includedir)/srtp
+-	if [ -f libsrtp.a ]; then cp libsrtp.a $(DESTDIR)$(libdir)/; fi
++	libtool --mode=install install libsrtp.la $(DESTDIR)$(libdir)
+ 
+ uninstall:
+ 	rm -rf $(DESTDIR)$(includedir)/srtp
+-	rm -rf $(DESTDIR)$(libdir)/libsrtp.a
++	rm -rf $(DESTDIR)$(libdir)/libsrtp.*
+ 
+ clean:
+ 	rm -rf $(cryptobj) $(srtpobj) $(cryptomath) $(table_apps) TAGS \
+-        libcryptomath.a libsrtp.a core *.core test/core
++        libcryptomath.la libsrtp.la core *.core test/core
+ 	for a in * */* */*/*; do			\
+               if [ -f "$$a~" ] ; then rm -f $$a~; fi;	\
+         done;
+--- srtp/configure.in.orig	2006-05-07 20:51:06.000000000 +0200
++++ srtp/configure.in	2006-07-21 20:26:21.513177000 +0200
+@@ -35,10 +35,10 @@
+ 
+ AC_MSG_CHECKING(which random device to use)
+ if test "$enable_kernel_linux" = "yes"; then
+-   RNG_OBJS=rand_linux_kernel.o
++   RNG_OBJS=rand_linux_kernel.lo
+    AC_MSG_RESULT([Linux kernel builtin])
+ else
+-   RNG_OBJS=rand_source.o
++   RNG_OBJS=rand_source.lo
+    if test -n "$DEV_URANDOM"; then
+       AC_DEFINE_UNQUOTED(DEV_URANDOM, "$DEV_URANDOM",[Path to random device])
+       AC_MSG_RESULT([$DEV_URANDOM])

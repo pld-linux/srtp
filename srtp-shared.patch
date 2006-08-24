@@ -64,12 +64,12 @@
 -%.o: %.c
 -	$(COMPILE) -c $< -o $@
 +%.lo: %.c
-+	libtool --mode=compile $(COMPILE) -c $< -o $@
++	libtool --mode=compile --tag=CC $(COMPILE) -c $< -o $@
  
 -%$(EXE): %.c libcryptomodule.a 
 -	$(COMPILE) $(LDFLAGS) $< -o $@ $(CRYPTOLIB) $(LIBS)
 +%$(EXE): %.c libcryptomodule.la 
-+	libtool --mode=link $(COMPILE) $(LDFLAGS) $< -o $@ $(CRYPTOLIB) $(LIBS)
++	libtool --mode=link --tag=CC $(COMPILE) $(LDFLAGS) $< -o $@ $(CRYPTOLIB) $(LIBS)
  
  ifndef AR
    AR=ar
@@ -81,7 +81,7 @@
 -	$(AR) cr libcryptomodule.a $(cryptobj) 
 -	$(RANLIB) libcryptomodule.a
 +libcryptomodule.la: $(cryptobj)
-+	libtool --mode=link $(CC) $(LDFLAGS) -o $@ $^
++	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $^
  
 -all: libcryptomodule.a $(testapp)
 +all: libcryptomodule.la $(testapp)
@@ -115,11 +115,11 @@
  	$(COMPILE) -c $< -o $@
  
 +%.lo: %.c
-+	libtool --mode=compile $(COMPILE) -c $< -o $@
++	libtool --mode=compile --tag=CC $(COMPILE) -c $< -o $@
 +
  %$(EXE): %.c
 -	$(COMPILE) $(LDFLAGS) $< -o $@ $(SRTPLIB) $(LIBS)
-+	libtool --mode=link $(COMPILE) $(LDFLAGS) $< -o $@ $(SRTPLIB) $(LIBS)
++	libtool --mode=link --tag=CC $(COMPILE) $(LDFLAGS) $< -o $@ $(SRTPLIB) $(LIBS)
  
  
 -# libcrypt.a (the crypto engine) 
@@ -170,7 +170,7 @@
 -	ar cr libsrtp.a $^
 -	$(RANLIB) libsrtp.a
 +libsrtp.la: $(srtpobj) $(cryptobj) $(gdoi)
-+	libtool --mode=link $(CC) -o $@ $^ -rpath $(libdir)
++	libtool --mode=link --tag=CC $(CC) -o $@ $^ -rpath $(libdir)
  
  # libcryptomath.a contains general-purpose routines that are used to
  # generate tables and verify cryptoalgorithm implementations - this
@@ -183,7 +183,7 @@
 -	ar cr libcryptomath.a $(cryptomath)
 -	$(RANLIB) libcryptomath.a
 +libcryptomath.la: $(cryptomath)
-+	libtool --mode=link $(CC) -o $@ $^
++	libtool --mode=link --tag=CC $(CC) -o $@ $^
  
  
  # test applications 
@@ -196,7 +196,7 @@
  
  test/rtpw$(EXE): test/rtpw.c test/rtp.c
 -	$(COMPILE) $(LDFLAGS) -o $@ $^ $(LIBS) $(SRTPLIB)
-+	libtool --mode=link $(COMPILE) $(LDFLAGS) -o $@ $^ $(LIBS) $(SRTPLIB)
++	libtool --mode=link --tag=CC $(COMPILE) $(LDFLAGS) -o $@ $^ $(LIBS) $(SRTPLIB)
  
  test: $(testapp)
  	@echo "Build done. Please run '$(MAKE) runtest' to run self tests."
@@ -207,7 +207,7 @@
 -tables/%: tables/%.c libcryptomath.a 
 -	$(COMPILE) $(LDFLAGS) $< -o $@ $(LIBS) libcryptomath.a
 +tables/%: tables/%.c libcryptomath.la 
-+	libtool --mode=link $(COMPILE) $(LDFLAGS) $< -o $@ $(LIBS) libcryptomath.la
++	libtool --mode=link --tag=CC $(COMPILE) $(LDFLAGS) $< -o $@ $(LIBS) libcryptomath.la
  
  # the target 'plot' runs the timing test (test/srtp_driver -t) then
  # uses gnuplot to produce plots of the results - see the script file

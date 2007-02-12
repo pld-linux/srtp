@@ -1,5 +1,5 @@
 Summary:	Open-source implementation of Secure Real-time Transport Protocol
-Summary(pl.UTF-8):   Otwarta implementacja protokołu Secure Real-time Transport Protocol
+Summary(pl.UTF-8):	Otwarta implementacja protokołu Secure Real-time Transport Protocol
 Name:		srtp
 Version:	1.4.2
 Release:	2
@@ -23,7 +23,7 @@ Real-time Transport Protocol).
 
 %package devel
 Summary:	Header files for SRTP library
-Summary(pl.UTF-8):   Pliki nagłówkowe biblioteki SRTP
+Summary(pl.UTF-8):	Pliki nagłówkowe biblioteki SRTP
 Group:		Development/Libraries
 Requires:	%{name} = %{version}-%{release}
 
@@ -35,7 +35,7 @@ Pliki nagłówkowe biblioteki SRTP.
 
 %package static
 Summary:	Static SRTP library
-Summary(pl.UTF-8):   Statyczna biblioteka SRTP
+Summary(pl.UTF-8):	Statyczna biblioteka SRTP
 Group:		Development/Libraries
 Requires:	%{name}-devel = %{version}-%{release}
 

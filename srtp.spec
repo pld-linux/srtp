@@ -1,5 +1,5 @@
 Summary:	Open-source implementation of Secure Real-time Transport Protocol
-Summary(pl):	Otwarta implementacja protoko≥u Secure Real-time Transport Protocol
+Summary(pl.UTF-8):   Otwarta implementacja protoko≈Çu Secure Real-time Transport Protocol
 Name:		srtp
 Version:	1.4.2
 Release:	2
@@ -17,32 +17,32 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 The libSRTP library is an open-source implementation of Secure
 Real-time Transport Protocol (SRTP).
 
-%description -l pl
-Biblioteka libSRTP to otwarta implementacja protoko≥u SRTP (Secure
+%description -l pl.UTF-8
+Biblioteka libSRTP to otwarta implementacja protoko≈Çu SRTP (Secure
 Real-time Transport Protocol).
 
 %package devel
 Summary:	Header files for SRTP library
-Summary(pl):	Pliki nag≥Ûwkowe biblioteki SRTP
+Summary(pl.UTF-8):   Pliki nag≈Ç√≥wkowe biblioteki SRTP
 Group:		Development/Libraries
 Requires:	%{name} = %{version}-%{release}
 
 %description devel
 Header files for SRTP library.
 
-%description devel -l pl
-Pliki nag≥Ûwkowe biblioteki SRTP.
+%description devel -l pl.UTF-8
+Pliki nag≈Ç√≥wkowe biblioteki SRTP.
 
 %package static
 Summary:	Static SRTP library
-Summary(pl):	Statyczna biblioteka SRTP
+Summary(pl.UTF-8):   Statyczna biblioteka SRTP
 Group:		Development/Libraries
 Requires:	%{name}-devel = %{version}-%{release}
 
 %description static
 Static SRTP library.
 
-%description static -l pl
+%description static -l pl.UTF-8
 Statyczna biblioteka SRTP.
 
 %prep

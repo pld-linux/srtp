@@ -96,9 +96,20 @@
  	for a in * .* */*; do if [ -f "$$a~" ] ; then rm $$a~; fi; done;
  	rm -f `find . -name "*.[ch]~*~"`
  	rm -rf latex
---- srtp/Makefile.in.orig	2006-03-17 22:00:46.000000000 +0100
-+++ srtp/Makefile.in	2006-07-21 20:44:16.620367000 +0200
-@@ -36,9 +36,9 @@
+--- srtp-1.4.4/Makefile.in~	2010-05-21 20:45:35.000000000 +0300
++++ srtp-1.4.4/Makefile.in	2011-01-06 13:10:25.617052634 +0200
+@@ -7,8 +7,8 @@
+ #
+ # runtest       runs test applications 
+ # test		builds test applications
+-# libcrypt.a	static library implementing crypto engine
+-# libsrtp.a	static library implementing srtp
++# libcrypt.la	library implementing crypto engine
++# libsrtp.la	library implementing srtp
+ # clean		removes objects, libs, and executables
+ # distribution  cleans and builds a .tgz
+ # tags          builds etags file from all .c and .h files
+@@ -38,9 +38,9 @@
  CPPFLAGS= @CPPFLAGS@
  CFLAGS	= @CFLAGS@
  LIBS	= @LIBS@
@@ -110,8 +121,12 @@
  
  RANLIB	= @RANLIB@
  INSTALL	= @INSTALL@
-@@ -67,51 +67,52 @@
- %.o: %.c
+@@ -66,54 +66,55 @@
+ 
+ # implicit rules for object files and test apps
+ 
+-%.o: %.c
++%.lo: %.c
  	$(COMPILE) -c $< -o $@
  
 +%.lo: %.c
@@ -134,7 +149,7 @@
 -hashes  = crypto/hash/null_auth.o crypto/hash/sha1.o \
 -          crypto/hash/hmac.o crypto/hash/auth.o # crypto/hash/tmmhv2.o 
 +hashes  = crypto/hash/null_auth.lo crypto/hash/sha1.lo \
-+          crypto/hash/hmac.lo crypto/hash/auth.lo # crypto/hash/tmmhv2.lo
++          crypto/hash/hmac.lo crypto/hash/auth.lo # crypto/hash/tmmhv2.lo 
  
 -replay  = crypto/replay/rdb.o crypto/replay/rdbx.o               \
 -          crypto/replay/ut_sim.o 
@@ -145,7 +160,7 @@
 +math    = crypto/math/datatypes.lo crypto/math/stat.lo
  
 -ust     = crypto/ust/ust.o 
-+ust     = crypto/ust/ust.lo
++ust     = crypto/ust/ust.lo 
  
 -rng     = crypto/rng/$(RNG_OBJS) crypto/rng/prng.o crypto/rng/ctr_prng.o
 +rng     = crypto/rng/$(RNG_OBJS) crypto/rng/prng.lo crypto/rng/ctr_prng.lo
@@ -163,8 +178,8 @@
 -# libsrtp.a (implements srtp processing)
 +# libsrtp.la (implements srtp processing)
  
--srtpobj = srtp/srtp.o 
-+srtpobj = srtp/srtp.lo 
+-srtpobj = srtp/srtp.o srtp/ekt.o
++srtpobj = srtp/srtp.lo srtp/ekt.lo
  
 -libsrtp.a: $(srtpobj) $(cryptobj) $(gdoi)
 -	ar cr libsrtp.a $^
@@ -172,12 +187,13 @@
 +libsrtp.la: $(srtpobj) $(cryptobj) $(gdoi)
 +	libtool --mode=link --tag=CC $(CC) -o $@ $^ -rpath $(libdir)
  
- # libcryptomath.a contains general-purpose routines that are used to
+-# libcryptomath.a contains general-purpose routines that are used to
++# libcryptomath.la contains general-purpose routines that are used to
  # generate tables and verify cryptoalgorithm implementations - this
  # library is not meant to be included in production code
  
 -cryptomath = crypto/math/math.o crypto/math/gf2_8.o 
-+cryptomath = crypto/math/math.lo crypto/math/gf2_8.lo
++cryptomath = crypto/math/math.lo crypto/math/gf2_8.lo 
  
 -libcryptomath.a: $(cryptomath)
 -	ar cr libcryptomath.a $(cryptomath)
@@ -187,20 +203,32 @@
  
  
  # test applications 
-@@ -124,10 +125,10 @@
- testapp = $(crypto_testapp) test/srtp_driver$(EXE) test/replay_driver$(EXE) \
- 	  test/roc_driver$(EXE) test/rdbx_driver$(EXE) test/rtpw$(EXE)
+@@ -127,19 +128,19 @@
+ 	  test/roc_driver$(EXE) test/rdbx_driver$(EXE) test/rtpw$(EXE) \
+ 	  test/dtls_srtp_driver$(EXE)
  
 -$(testapp): libsrtp.a
 +$(testapp): libsrtp.la
  
- test/rtpw$(EXE): test/rtpw.c test/rtp.c
+ test/rtpw$(EXE): test/rtpw.c test/rtp.c test/getopt_s.c
+-	$(COMPILE) $(LDFLAGS) -o $@ $^ $(LIBS) $(SRTPLIB)
++	libtool --mode=link --tag=CC $(COMPILE) $(LDFLAGS) -o $@ $^ $(LIBS) $(SRTPLIB)
+ 
+ test/srtp_driver$(EXE): test/srtp_driver.c test/getopt_s.c
+-	$(COMPILE) $(LDFLAGS) -o $@ $^ $(LIBS) $(SRTPLIB)
++	libtool --mode=link --tag=CC $(COMPILE) $(LDFLAGS) -o $@ $^ $(LIBS) $(SRTPLIB)
+ 
+ test/rdbx_driver$(EXE): test/rdbx_driver.c test/getopt_s.c
+-	$(COMPILE) $(LDFLAGS) -o $@ $^ $(LIBS) $(SRTPLIB)
++	libtool --mode=link --tag=CC $(COMPILE) $(LDFLAGS) -o $@ $^ $(LIBS) $(SRTPLIB)
+ 
+ test/dtls_srtp_driver$(EXE): test/dtls_srtp_driver.c test/getopt_s.c
 -	$(COMPILE) $(LDFLAGS) -o $@ $^ $(LIBS) $(SRTPLIB)
 +	libtool --mode=link --tag=CC $(COMPILE) $(LDFLAGS) -o $@ $^ $(LIBS) $(SRTPLIB)
  
  test: $(testapp)
  	@echo "Build done. Please run '$(MAKE) runtest' to run self tests."
-@@ -151,8 +152,8 @@
+@@ -163,8 +164,8 @@
  
  # in the tables/ subdirectory, we use libcryptomath instead of libsrtp
  
@@ -211,20 +239,27 @@
  
  # the target 'plot' runs the timing test (test/srtp_driver -t) then
  # uses gnuplot to produce plots of the results - see the script file
-@@ -184,15 +185,15 @@
+@@ -194,19 +195,19 @@
+ 	fi
+ 	$(INSTALL) -d $(DESTDIR)$(includedir)/srtp
  	$(INSTALL) -d $(DESTDIR)$(libdir)
- 	cp include/*.h $(DESTDIR)$(includedir)/srtp  
- 	cp crypto/include/*.h $(DESTDIR)$(includedir)/srtp
+-	cp $(srcdir)/include/*.h $(DESTDIR)$(includedir)/srtp  
+-	cp $(srcdir)/crypto/include/*.h $(DESTDIR)$(includedir)/srtp
+-	if [ "$(srcdir)" != "." ]; then cp crypto/include/*.h $(DESTDIR)$(includedir)/srtp; fi
 -	if [ -f libsrtp.a ]; then cp libsrtp.a $(DESTDIR)$(libdir)/; fi
++	cp -p $(srcdir)/include/*.h $(DESTDIR)$(includedir)/srtp  
++	cp -p $(srcdir)/crypto/include/*.h $(DESTDIR)$(includedir)/srtp
++	if [ "$(srcdir)" != "." ]; then cp -p crypto/include/*.h $(DESTDIR)$(includedir)/srtp; fi
 +	libtool --mode=install install libsrtp.la $(DESTDIR)$(libdir)
  
  uninstall:
- 	rm -rf $(DESTDIR)$(includedir)/srtp
--	rm -rf $(DESTDIR)$(libdir)/libsrtp.a
-+	rm -rf $(DESTDIR)$(libdir)/libsrtp.*
+ 	rm -f $(DESTDIR)$(includedir)/srtp/*.h
+-	rm -f $(DESTDIR)$(libdir)/libsrtp.a
++	rm -f $(DESTDIR)$(libdir)/libsrtp.*
+ 	-rmdir $(DESTDIR)$(includedir)/srtp
  
  clean:
- 	rm -rf $(cryptobj) $(srtpobj) $(cryptomath) $(table_apps) TAGS \
+ 	rm -rf $(cryptobj) $(srtpobj) $(cryptomath) TAGS \
 -        libcryptomath.a libsrtp.a core *.core test/core
 +        libcryptomath.la libsrtp.la core *.core test/core
  	for a in * */* */*/*; do			\

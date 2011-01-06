@@ -1,17 +1,28 @@
+#
+# Conditional build:
+%bcond_without	static_libs	# don't build static libraries
+
 Summary:	Open-source implementation of Secure Real-time Transport Protocol
 Summary(pl.UTF-8):	Otwarta implementacja protokołu Secure Real-time Transport Protocol
 Name:		srtp
-Version:	1.4.2
-Release:	3
+Version:	1.4.4
+Release:	1
 License:	BSD
 Group:		Libraries
-Source0:	http://srtp.sourceforge.net/%{name}-%{version}.tgz
-# Source0-md5:	7b0ffbfad9bbaf33d397027e031cb35a
+# Source0:	http://srtp.sourceforge.net/%{name}-%{version}.tgz
+# Upstream 1.4.4 tarball is a bit dated, need to use cvs
+# cvs -d:pserver:anonymous@srtp.cvs.sourceforge.net:/cvsroot/srtp co -P srtp
+# tar cvfj srtp-1.4.4-20101004cvs.tar.bz2 srtp/
+Source0:	%{name}-%{version}-20101004cvs.tar.bz2
+# Source0-md5:	160479555f5e95027ad318605c1c670c
 Patch0:		%{name}-shared.patch
+Source1:	lib%{name}.pc
 URL:		http://srtp.sourceforge.net/srtp.html
 BuildRequires:	autoconf
 BuildRequires:	libtool
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
+
+%define		specflags	-fPIC
 
 %description
 The libSRTP library is an open-source implementation of Secure
@@ -46,20 +57,31 @@ Static SRTP library.
 Statyczna biblioteka SRTP.
 
 %prep
-%setup -q -n srtp
+%setup -q -n %{name}
 %patch0 -p1
 
 %build
 %{__autoconf}
 %{__autoheader}
-%configure
+%configure \
+	%{?with_static_libs:--disable-static}
 %{__make}
 
 %install
 rm -rf $RPM_BUILD_ROOT
-
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
+
+/sbin/ldconfig -n $RPM_BUILD_ROOT%{_libdir}
+ln -sf $(basename $RPM_BUILD_ROOT%{_libdir}/libsrtp.so.*.*.*) $RPM_BUILD_ROOT%{_libdir}/libsrtp.so
+
+# Install the pkg-config file
+install -d $RPM_BUILD_ROOT%{_pkgconfigdir}
+sed -e "
+	s|@PREFIX@|%{_prefix}|g
+	s|@LIBDIR@|%{_libdir}|g
+	s|@INCLUDEDIR@|%{_includedir}|g
+" < %{SOURCE1} > $RPM_BUILD_ROOT%{_pkgconfigdir}/libsrtp.pc
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -70,15 +92,19 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(644,root,root,755)
 %doc CHANGES LICENSE README TODO
-%attr(755,root,root) %{_libdir}/lib*.so.*.*.*
+%attr(755,root,root) %{_libdir}/libsrtp.so.*.*.*
+%ghost %{_libdir}/libsrtp.so.0
 
 %files devel
 %defattr(644,root,root,755)
 %doc doc/{crypto_kernel.txt,intro.txt,references.txt,draft-irtf-cfrg-icm-00.txt,libsrtp.pdf}
-%attr(755,root,root) %{_libdir}/lib*.so
-%{_libdir}/lib*.la
+%attr(755,root,root) %{_libdir}/libsrtp.so
+%{_pkgconfigdir}/libsrtp.pc
+%{_libdir}/libsrtp.la
 %{_includedir}/srtp
 
+%if %{with static_libs}
 %files static
 %defattr(644,root,root,755)
 %{_libdir}/libsrtp.a
+%endif

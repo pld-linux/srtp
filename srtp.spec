@@ -6,7 +6,7 @@ Summary:	Open-source implementation of Secure Real-time Transport Protocol
 Summary(pl.UTF-8):	Otwarta implementacja protokołu Secure Real-time Transport Protocol
 Name:		srtp
 Version:	1.4.4
-Release:	1
+Release:	2
 License:	BSD
 Group:		Libraries
 # Source0:	http://srtp.sourceforge.net/%{name}-%{version}.tgz

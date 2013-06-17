@@ -1,0 +1,177 @@
+diff --git a/crypto/hash/hmac.c b/crypto/hash/hmac.c
+index 4f389fe..5ab81e5 100644
+--- a/crypto/hash/hmac.c
++++ b/crypto/hash/hmac.c
+@@ -137,10 +137,10 @@ hmac_init(hmac_ctx_t *state, const uint8_t *key, int key_len) {
+   debug_print(mod_hmac, "ipad: %s", octet_string_hex_string(ipad, 64));
+   
+   /* initialize sha1 context */
+-  sha1_init(&state->init_ctx);
++  srtp_sha1_init(&state->init_ctx);
+ 
+   /* hash ipad ^ key */
+-  sha1_update(&state->init_ctx, ipad, 64);
++  srtp_sha1_update(&state->init_ctx, ipad, 64);
+   memcpy(&state->ctx, &state->init_ctx, sizeof(sha1_ctx_t)); 
+ 
+   return err_status_ok;
+@@ -161,7 +161,7 @@ hmac_update(hmac_ctx_t *state, const uint8_t *message, int msg_octets) {
+ 	      octet_string_hex_string(message, msg_octets));
+   
+   /* hash message into sha1 context */
+-  sha1_update(&state->ctx, message, msg_octets);
++  srtp_sha1_update(&state->ctx, message, msg_octets);
+ 
+   return err_status_ok;
+ }
+@@ -179,7 +179,7 @@ hmac_compute(hmac_ctx_t *state, const void *message,
+   
+   /* hash message, copy output into H */
+   hmac_update(state, (const uint8_t*)message, msg_octets);
+-  sha1_final(&state->ctx, H);
++  srtp_sha1_final(&state->ctx, H);
+ 
+   /*
+    * note that we don't need to debug_print() the input, since the
+@@ -189,16 +189,16 @@ hmac_compute(hmac_ctx_t *state, const void *message,
+ 	      octet_string_hex_string((uint8_t *)H, 20));
+ 
+   /* re-initialize hash context */
+-  sha1_init(&state->ctx);
++  srtp_sha1_init(&state->ctx);
+   
+   /* hash opad ^ key  */
+-  sha1_update(&state->ctx, (uint8_t *)state->opad, 64);
++  srtp_sha1_update(&state->ctx, (uint8_t *)state->opad, 64);
+ 
+   /* hash the result of the inner hash */
+-  sha1_update(&state->ctx, (uint8_t *)H, 20);
++  srtp_sha1_update(&state->ctx, (uint8_t *)H, 20);
+   
+   /* the result is returned in the array hash_value[] */
+-  sha1_final(&state->ctx, hash_value);
++  srtp_sha1_final(&state->ctx, hash_value);
+ 
+   /* copy hash_value to *result */
+   for (i=0; i < tag_len; i++)    
+diff --git a/crypto/hash/sha1.c b/crypto/hash/sha1.c
+index b9a8d10..b1c9c8a 100644
+--- a/crypto/hash/sha1.c
++++ b/crypto/hash/sha1.c
+@@ -74,12 +74,12 @@ uint32_t SHA_K2 = 0x8F1BBCDC;   /* Kt for 40 <= t <= 59 */
+ uint32_t SHA_K3 = 0xCA62C1D6;   /* Kt for 60 <= t <= 79 */
+ 
+ void
+-sha1(const uint8_t *msg,  int octets_in_msg, uint32_t hash_value[5]) {
++srtp_sha1(const uint8_t *msg,  int octets_in_msg, uint32_t hash_value[5]) {
+   sha1_ctx_t ctx;
+ 
+-  sha1_init(&ctx);
+-  sha1_update(&ctx, msg, octets_in_msg);
+-  sha1_final(&ctx, hash_value);
++  srtp_sha1_init(&ctx);
++  srtp_sha1_update(&ctx, msg, octets_in_msg);
++  srtp_sha1_final(&ctx, hash_value);
+ 
+ }
+ 
+@@ -96,7 +96,7 @@ sha1(const uint8_t *msg,  int octets_in_msg, uint32_t hash_value[5]) {
+  */
+ 
+ void
+-sha1_core(const uint32_t M[16], uint32_t hash_value[5]) {
++srtp_sha1_core(const uint32_t M[16], uint32_t hash_value[5]) {
+   uint32_t H0;
+   uint32_t H1;
+   uint32_t H2;
+@@ -183,7 +183,7 @@ sha1_core(const uint32_t M[16], uint32_t hash_value[5]) {
+ }
+ 
+ void
+-sha1_init(sha1_ctx_t *ctx) {
++srtp_sha1_init(sha1_ctx_t *ctx) {
+ 
+   /* initialize state vector */
+   ctx->H[0] = 0x67452301;
+@@ -201,7 +201,7 @@ sha1_init(sha1_ctx_t *ctx) {
+ }
+ 
+ void
+-sha1_update(sha1_ctx_t *ctx, const uint8_t *msg, int octets_in_msg) {
++srtp_sha1_update(sha1_ctx_t *ctx, const uint8_t *msg, int octets_in_msg) {
+   int i;
+   uint8_t *buf = (uint8_t *)ctx->M;
+ 
+@@ -226,7 +226,7 @@ sha1_update(sha1_ctx_t *ctx, const uint8_t *msg, int octets_in_msg) {
+ 
+       debug_print(mod_sha1, "(update) running sha1_core()", NULL);
+ 
+-      sha1_core(ctx->M, ctx->H);
++      srtp_sha1_core(ctx->M, ctx->H);
+ 
+     } else {
+ 
+@@ -249,7 +249,7 @@ sha1_update(sha1_ctx_t *ctx, const uint8_t *msg, int octets_in_msg) {
+  */
+ 
+ void
+-sha1_final(sha1_ctx_t *ctx, uint32_t *output) {
++srtp_sha1_final(sha1_ctx_t *ctx, uint32_t *output) {
+   uint32_t A, B, C, D, E, TEMP;
+   uint32_t W[80];  
+   int i, t;
+diff --git a/crypto/include/sha1.h b/crypto/include/sha1.h
+index e3af4d4..af59b7e 100644
+--- a/crypto/include/sha1.h
++++ b/crypto/include/sha1.h
+@@ -65,7 +65,7 @@ typedef struct {
+  */
+ 
+ void
+-sha1(const uint8_t *message,  int octets_in_msg, uint32_t output[5]);
++srtp_sha1(const uint8_t *message,  int octets_in_msg, uint32_t output[5]);
+ 
+ /*
+  * sha1_init(&ctx) initializes the SHA1 context ctx
+@@ -79,13 +79,13 @@ sha1(const uint8_t *message,  int octets_in_msg, uint32_t output[5]);
+  */
+ 
+ void
+-sha1_init(sha1_ctx_t *ctx);
++srtp_sha1_init(sha1_ctx_t *ctx);
+ 
+ void
+-sha1_update(sha1_ctx_t *ctx, const uint8_t *M, int octets_in_msg);
++srtp_sha1_update(sha1_ctx_t *ctx, const uint8_t *M, int octets_in_msg);
+ 
+ void
+-sha1_final(sha1_ctx_t *ctx, uint32_t output[5]);
++srtp_sha1_final(sha1_ctx_t *ctx, uint32_t output[5]);
+ 
+ /*
+  * The sha1_core function is INTERNAL to SHA-1, but it is declared
+@@ -103,6 +103,6 @@ sha1_final(sha1_ctx_t *ctx, uint32_t output[5]);
+  */
+ 
+ void
+-sha1_core(const uint32_t M[16], uint32_t hash_value[5]);
++srtp_sha1_core(const uint32_t M[16], uint32_t hash_value[5]);
+      
+ #endif /* SHA1_H */
+diff --git a/crypto/test/sha1_driver.c b/crypto/test/sha1_driver.c
+index 6036022..f29d76e 100644
+--- a/crypto/test/sha1_driver.c
++++ b/crypto/test/sha1_driver.c
+@@ -107,9 +107,9 @@ sha1_test_case_validate(const hash_test_case_t *test_case) {
+   if (test_case->data_len > MAX_HASH_DATA_LEN)
+     return err_status_bad_param;
+ 
+-  sha1_init(&ctx);
+-  sha1_update(&ctx, test_case->data, test_case->data_len);
+-  sha1_final(&ctx, hash_value);
++  srtp_sha1_init(&ctx);
++  srtp_sha1_update(&ctx, test_case->data, test_case->data_len);
++  srtp_sha1_final(&ctx, hash_value);
+   if (0 == memcmp(test_case->hash, hash_value, 20)) {
+ #if VERBOSE
+     printf("PASSED: reference value: %s\n", 

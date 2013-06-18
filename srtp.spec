@@ -2,7 +2,7 @@
 # Conditional build:
 %bcond_without	static_libs	# don't build static libraries
 
-%define		rel		4
+%define		rel	4
 %define		subver	20121108
 Summary:	Open-source implementation of Secure Real-time Transport Protocol
 Summary(pl.UTF-8):	Otwarta implementacja protokołu Secure Real-time Transport Protocol
@@ -17,9 +17,9 @@ Group:		Libraries
 # tar cvfj srtp-1.4.4-20101004cvs.tar.bz2 srtp/
 Source0:	http://dev.gentoo.org/~phajdan.jr/%{name}-%{version}_p%{subver}.tar.gz
 # Source0-md5:	1d1a644d3847000b8e186578867bf839
+Source1:	lib%{name}.pc
 Patch0:		%{name}-shared.patch
 Patch1:		%{name}-rename_functions.patch
-Source1:	lib%{name}.pc
 URL:		http://srtp.sourceforge.net/srtp.html
 BuildRequires:	autoconf
 BuildRequires:	libtool
@@ -97,7 +97,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %doc CHANGES LICENSE README TODO
 %attr(755,root,root) %{_libdir}/libsrtp.so.*.*.*
-%ghost %{_libdir}/libsrtp.so.0
+%attr(755,root,root) %ghost %{_libdir}/libsrtp.so.0
 
 %files devel
 %defattr(644,root,root,755)

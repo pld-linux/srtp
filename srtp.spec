@@ -2,7 +2,7 @@
 # Conditional build:
 %bcond_without	static_libs	# don't build static libraries
 
-%define		rel	4
+%define		rel	5
 %define		subver	20121108
 Summary:	Open-source implementation of Secure Real-time Transport Protocol
 Summary(pl.UTF-8):	Otwarta implementacja protokołu Secure Real-time Transport Protocol

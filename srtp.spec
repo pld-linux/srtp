@@ -2,13 +2,13 @@
 # Conditional build:
 %bcond_without	static_libs	# don't build static libraries
 
-%define		rel	5
+%define		rel	1
 %define		subver	20121108
 Summary:	Open-source implementation of Secure Real-time Transport Protocol
 Summary(pl.UTF-8):	Otwarta implementacja protokołu Secure Real-time Transport Protocol
 Name:		srtp
 Version:	1.4.4
-Release:	%{rel}.%{subver}
+Release:	5.%{subver}.%{rel}
 License:	BSD
 Group:		Libraries
 # Source0:	http://srtp.sourceforge.net/%{name}-%{version}.tgz

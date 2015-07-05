@@ -1,31 +1,21 @@
-#
-# Conditional build:
-%bcond_without	static_libs	# don't build static libraries
-
-%define		rel	1
-%define		subver	20121108
 Summary:	Open-source implementation of Secure Real-time Transport Protocol
 Summary(pl.UTF-8):	Otwarta implementacja protokołu Secure Real-time Transport Protocol
 Name:		srtp
-Version:	1.4.4
-Release:	5.%{subver}.%{rel}
+Version:	1.5.2
+Release:	1
 License:	BSD
 Group:		Libraries
-# Source0:	http://srtp.sourceforge.net/%{name}-%{version}.tgz
-# Upstream 1.4.4 tarball is a bit dated, need to use cvs
-# cvs -d:pserver:anonymous@srtp.cvs.sourceforge.net:/cvsroot/srtp co -P srtp
-# tar cvfj srtp-1.4.4-20101004cvs.tar.bz2 srtp/
-Source0:	http://dev.gentoo.org/~phajdan.jr/%{name}-%{version}_p%{subver}.tar.gz
-# Source0-md5:	1d1a644d3847000b8e186578867bf839
-Source1:	lib%{name}.pc
+Source0:	https://github.com/cisco/libsrtp/archive/v%{version}/libsrtp-%{version}.tar.gz
+# Source0-md5:	2309aa6027992810a4285b042c71e644
 Patch0:		%{name}-shared.patch
 Patch1:		%{name}-rename_functions.patch
 URL:		http://srtp.sourceforge.net/srtp.html
 BuildRequires:	autoconf
-BuildRequires:	libtool
+BuildRequires:	libpcap-devel
+BuildRequires:	openssl-devel >= 1.0.1
+BuildRequires:	pkgconfig
+BuildRequires:	zlib-devel
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
-
-%define		specflags	-fPIC
 
 %description
 The libSRTP library is an open-source implementation of Secure
@@ -40,6 +30,9 @@ Summary:	Header files for SRTP library
 Summary(pl.UTF-8):	Pliki nagłówkowe biblioteki SRTP
 Group:		Development/Libraries
 Requires:	%{name} = %{version}-%{release}
+Requires:	libpcap-devel
+Requires:	openssl-devel >= 1.0.1
+Requires:	zlib-devel
 
 %description devel
 Header files for SRTP library.
@@ -60,7 +53,7 @@ Static SRTP library.
 Statyczna biblioteka SRTP.
 
 %prep
-%setup -q -n %{name}
+%setup -q -n libsrtp-%{version}
 %patch0 -p1
 %patch1 -p1
 
@@ -68,24 +61,15 @@ Statyczna biblioteka SRTP.
 %{__autoconf}
 %{__autoheader}
 %configure \
-	%{?with_static_libs:--disable-static}
-%{__make}
+	--enable-openssl
+
+%{__make} shared_library
+%{__make} all
 
 %install
 rm -rf $RPM_BUILD_ROOT
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
-
-/sbin/ldconfig -n $RPM_BUILD_ROOT%{_libdir}
-ln -sf $(basename $RPM_BUILD_ROOT%{_libdir}/libsrtp.so.*.*.*) $RPM_BUILD_ROOT%{_libdir}/libsrtp.so
-
-# Install the pkg-config file
-install -d $RPM_BUILD_ROOT%{_pkgconfigdir}
-sed -e "
-	s|@PREFIX@|%{_prefix}|g
-	s|@LIBDIR@|%{_libdir}|g
-	s|@INCLUDEDIR@|%{_includedir}|g
-" < %{SOURCE1} > $RPM_BUILD_ROOT%{_pkgconfigdir}/libsrtp.pc
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -96,19 +80,15 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(644,root,root,755)
 %doc CHANGES LICENSE README TODO
-%attr(755,root,root) %{_libdir}/libsrtp.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libsrtp.so.0
+%attr(755,root,root) %{_libdir}/libsrtp.so.1
 
 %files devel
 %defattr(644,root,root,755)
 %doc doc/{crypto_kernel.txt,intro.txt,references.txt,draft-irtf-cfrg-icm-00.txt,libsrtp.pdf}
 %attr(755,root,root) %{_libdir}/libsrtp.so
 %{_pkgconfigdir}/libsrtp.pc
-%{_libdir}/libsrtp.la
 %{_includedir}/srtp
 
-%if %{with static_libs}
 %files static
 %defattr(644,root,root,755)
 %{_libdir}/libsrtp.a
-%endif

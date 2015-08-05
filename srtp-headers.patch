@@ -1,0 +1,108 @@
+--- libsrtp-1.5.2/include/rtp.h.orig	2015-03-11 15:02:12.000000000 +0100
++++ libsrtp-1.5.2/include/rtp.h	2015-08-05 20:52:03.448242500 +0200
+@@ -54,6 +54,8 @@
+ #ifndef RTP_H
+ #define RTP_H
+ 
++#include "config.h"
++
+ #ifdef HAVE_NETINET_IN_H
+ # include <netinet/in.h>
+ #elif defined HAVE_WINSOCK2_H
+--- libsrtp-1.5.2/crypto/include/datatypes.h.orig	2015-03-11 15:02:12.000000000 +0100
++++ libsrtp-1.5.2/crypto/include/datatypes.h	2015-08-05 20:49:25.094915812 +0200
+@@ -47,6 +47,7 @@
+ #ifndef _DATATYPES_H
+ #define _DATATYPES_H
+ 
++#include "config.h"
+ #include "integers.h"           /* definitions of uint32_t, et cetera   */
+ #include "alloc.h"
+ 
+--- libsrtp-1.5.2/crypto/include/err.h.orig	2015-03-11 15:02:12.000000000 +0100
++++ libsrtp-1.5.2/crypto/include/err.h	2015-08-05 20:49:42.271581757 +0200
+@@ -46,6 +46,8 @@
+ #ifndef ERR_H
+ #define ERR_H
+ 
++#include "config.h"
++
+ #include <stdio.h>
+ #include <stdarg.h>
+ 
+--- libsrtp-1.5.2/crypto/include/hmac.h.orig	2015-03-11 15:02:12.000000000 +0100
++++ libsrtp-1.5.2/crypto/include/hmac.h	2015-08-05 20:50:02.894914225 +0200
+@@ -46,6 +46,7 @@
+ #ifndef HMAC_H
+ #define HMAC_H
+ 
++#include "config.h"
+ #include "auth.h"
+ #include "sha1.h"
+ 
+--- libsrtp-1.5.2/crypto/include/integers.h.orig	2015-03-11 15:02:12.000000000 +0100
++++ libsrtp-1.5.2/crypto/include/integers.h	2015-08-05 20:50:14.444913741 +0200
+@@ -47,6 +47,7 @@
+ #ifndef INTEGERS_H
+ #define INTEGERS_H
+ 
++#include "config.h"
+ 
+ #ifdef SRTP_KERNEL
+ 
+--- libsrtp-1.5.2/crypto/include/kernel_compat.h.orig	2015-03-11 15:02:12.000000000 +0100
++++ libsrtp-1.5.2/crypto/include/kernel_compat.h	2015-08-05 20:50:34.308246240 +0200
+@@ -46,6 +46,8 @@
+ #ifndef KERNEL_COMPAT_H
+ #define KERNEL_COMPAT_H
+ 
++#include "config.h"
++
+ #ifdef SRTP_KERNEL_LINUX
+ 
+ #include <linux/kernel.h>
+--- libsrtp-1.5.2/crypto/include/prng.h.orig	2015-03-11 15:02:12.000000000 +0100
++++ libsrtp-1.5.2/crypto/include/prng.h	2015-08-05 20:50:54.158245407 +0200
+@@ -46,6 +46,7 @@
+ #ifndef PRNG_H
+ #define PRNG_H
+ 
++#include "config.h"
+ #include "rand_source.h"  /* for rand_source_func_t definition       */
+ #include "aes.h"          /* for aes                                 */
+ //FIXME: this is temporary until we pull in the code to use OpenSSL for RNG
+--- libsrtp-1.5.2/crypto/include/sha1.h.orig	2015-08-05 20:34:49.334952564 +0200
++++ libsrtp-1.5.2/crypto/include/sha1.h	2015-08-05 20:51:23.068244194 +0200
+@@ -47,9 +47,7 @@
+ #ifndef SHA1_H
+ #define SHA1_H
+ 
+-#ifdef HAVE_CONFIG_H
+-    #include <config.h>
+-#endif
++#include "config.h"
+ 
+ #include "err.h"
+ #ifdef OPENSSL
+--- libsrtp-1.5.2/crypto/include/rand_source.h.orig	2015-03-11 15:02:12.000000000 +0100
++++ libsrtp-1.5.2/crypto/include/rand_source.h	2015-08-05 21:41:41.868117509 +0200
+@@ -49,6 +49,10 @@
+ #include "err.h"
+ #include "datatypes.h"
+ 
++#ifdef __cplusplus
++extern "C" {
++#endif
++
+ err_status_t
+ rand_source_init(void);
+ 
+@@ -88,4 +92,8 @@
+ typedef err_status_t (*rand_source_func_t)
+      (void *dest, uint32_t num_octets);
+ 
++#ifdef __cplusplus
++}
++#endif
++
+ #endif /* RAND_SOURCE */

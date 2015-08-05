@@ -2,13 +2,14 @@ Summary:	Open-source implementation of Secure Real-time Transport Protocol
 Summary(pl.UTF-8):	Otwarta implementacja protokołu Secure Real-time Transport Protocol
 Name:		srtp
 Version:	1.5.2
-Release:	1
+Release:	2
 License:	BSD
 Group:		Libraries
 Source0:	https://github.com/cisco/libsrtp/archive/v%{version}/libsrtp-%{version}.tar.gz
 # Source0-md5:	2309aa6027992810a4285b042c71e644
 Patch0:		%{name}-shared.patch
 Patch1:		%{name}-rename_functions.patch
+Patch2:		%{name}-headers.patch
 URL:		http://srtp.sourceforge.net/srtp.html
 BuildRequires:	autoconf
 BuildRequires:	libpcap-devel
@@ -56,6 +57,7 @@ Statyczna biblioteka SRTP.
 %setup -q -n libsrtp-%{version}
 %patch0 -p1
 %patch1 -p1
+%patch2 -p1
 
 %build
 %{__autoconf}

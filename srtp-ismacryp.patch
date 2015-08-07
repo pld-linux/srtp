@@ -1,0 +1,52 @@
+--- libsrtp-1.5.2/crypto/cipher/aes_icm.c.orig	2015-03-11 15:02:12.000000000 +0100
++++ libsrtp-1.5.2/crypto/cipher/aes_icm.c	2015-08-06 21:28:11.477858986 +0200
+@@ -53,10 +53,14 @@
+ #include "alloc.h"
+ 
+ 
++#ifdef OPENSSL
++extern debug_module_t mod_aes_icm;
++#else
+ debug_module_t mod_aes_icm = {
+   0,                 /* debugging is off by default */
+   "aes icm"          /* printable module name       */
+ };
++#endif
+ 
+ /*
+  * integer counter mode works as follows:
+@@ -482,14 +482,17 @@
+   return aes_icm_encrypt(c, buffer, &len);
+ }
+ 
++#ifndef OPENSSL
+ uint16_t
+ aes_icm_bytes_encrypted(aes_icm_ctx_t *c) {
+     return htons(c->counter.v16[7]);
+ }
++#endif
+ 
+ char 
+ aes_icm_description[] = "aes integer counter mode";
+ 
++#ifndef OPENSSL
+ uint8_t aes_icm_test_case_0_key[30] = {
+   0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6,
+   0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c,
+@@ -589,4 +594,5 @@
+   (debug_module_t *)            &mod_aes_icm,
+   (cipher_type_id_t)             AES_ICM
+ };
++#endif
+ 
+--- libsrtp-1.5.2/configure.in.orig	2015-03-11 15:02:12.000000000 +0100
++++ libsrtp-1.5.2/configure.in	2015-08-06 21:29:08.801189914 +0200
+@@ -153,7 +153,7 @@
+    AC_CHECK_LIB([crypto], [EVP_aes_128_gcm], [],
+              [AC_MSG_FAILURE([can't find openssl >1.0.1 crypto lib])])
+    AC_DEFINE(OPENSSL, 1, [Define this to use OpenSSL crypto.])
+-   AES_ICM_OBJS="crypto/cipher/aes_icm_ossl.o crypto/cipher/aes_gcm_ossl.o"
++   AES_ICM_OBJS="crypto/cipher/aes_icm_ossl.o crypto/cipher/aes_gcm_ossl.o crypto/cipher/aes_icm.o crypto/cipher/aes.o"
+    RNG_OBJS=rand_source_ossl.o
+    HMAC_OBJS=crypto/hash/hmac_ossl.o
+    USE_OPENSSL=1

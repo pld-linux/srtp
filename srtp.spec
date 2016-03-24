@@ -6,13 +6,13 @@ Release:	1
 License:	BSD
 Group:		Libraries
 Source0:	https://github.com/cisco/libsrtp/archive/v%{version}/libsrtp-%{version}.tar.gz
-# Source0-md5:	2309aa6027992810a4285b042c71e644
-Patch0:		%{name}-shared.patch
-Patch1:		%{name}-rename_functions.patch
-Patch2:		%{name}-headers.patch
-Patch3:		%{name}-ismacryp.patch
+# Source0-md5:	64a9580f86a9c3e1c4986e944e6a5a84
+Patch0:		%{name}-rename_functions.patch
+Patch1:		%{name}-headers.patch
+Patch2:		%{name}-ismacryp.patch
 URL:		https://github.com/cisco/libsrtp
 BuildRequires:	autoconf
+BuildRequires:	automake
 BuildRequires:	libpcap-devel
 BuildRequires:	openssl-devel >= 1.0.1
 BuildRequires:	pkgconfig
@@ -59,9 +59,9 @@ Statyczna biblioteka SRTP.
 %patch0 -p1
 %patch1 -p1
 %patch2 -p1
-%patch3 -p1
 
 %build
+%{__aclocal}
 %{__autoconf}
 %{__autoheader}
 %configure \
@@ -88,7 +88,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files devel
 %defattr(644,root,root,755)
-%doc doc/{crypto_kernel.txt,intro.txt,references.txt,draft-irtf-cfrg-icm-00.txt,libsrtp.pdf}
+%doc doc/{*.txt,*.pdf}
 %attr(755,root,root) %{_libdir}/libsrtp.so
 %{_pkgconfigdir}/libsrtp.pc
 %{_includedir}/srtp

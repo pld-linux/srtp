@@ -1,3 +1,4 @@
+# NOTE: for srtp 2.x see libsrtp2.spec
 Summary:	Open-source implementation of Secure Real-time Transport Protocol
 Summary(pl.UTF-8):	Otwarta implementacja protokołu Secure Real-time Transport Protocol
 Name:		srtp
